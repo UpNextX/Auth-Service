@@ -3,7 +3,7 @@ package org.upnext.authservice.Dtos.Request;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-// this comes from front
+// this comes from front with (token -> sent from back & new password)
 @Data
 public class PasswordResetRequest {
     @NotBlank

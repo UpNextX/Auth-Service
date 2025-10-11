@@ -1,4 +1,8 @@
 package org.upnext.authservice.services.Impl;
 
-public class UserServiceImpl {
+import org.springframework.stereotype.Service;
+import org.upnext.authservice.services.UserService;
+
+@Service
+public class UserServiceImpl implements UserService {
 }

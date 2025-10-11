@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.upnext.authservice.Dtos.Request.LoginRequest;
 import org.upnext.authservice.Dtos.Request.PasswordResetRequest;
+import org.upnext.authservice.Dtos.Request.PasswordResetWithMailRequest;
 import org.upnext.authservice.Dtos.Request.RegisterRequest;
 import org.upnext.authservice.models.PasswordReset;
 import org.upnext.authservice.models.User;
@@ -29,6 +30,11 @@ public class AuthController {
 
     }
 
+    @PostMapping("/confirm")
+    public ResponseEntity<?> confirm(@RequestParam("token") String token){
+
+    }
+
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(@RequestBody String refreshToken){
 
@@ -40,7 +46,7 @@ public class AuthController {
     }
 
     @PostMapping("/forget-password")
-    public ResponseEntity<?> forgetPassword(){
+    public ResponseEntity<?> forgetPassword(@RequestBody @Valid PasswordResetWithMailRequest passwordResetWithMail){
 
     }
 
