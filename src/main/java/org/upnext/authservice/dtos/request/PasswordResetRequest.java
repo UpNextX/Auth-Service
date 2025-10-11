@@ -1,4 +1,4 @@
-package org.upnext.authservice.Dtos.Request;
+package org.upnext.authservice.dtos.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;

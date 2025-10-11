@@ -1,4 +1,4 @@
-package org.upnext.authservice.Dtos.Request;
+package org.upnext.authservice.dtos.request;
 
 
 import jakarta.persistence.Transient;
@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.upnext.authservice.validation.PasswordValidator;
 
 @Data
 @NoArgsConstructor
@@ -35,7 +36,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "Password must be blank")
     @Size(min = 8, max = 32, message = "Password must be between 8 and 32 characters!")
-    //@PasswordValidator
+    @PasswordValidator
     String password;
 
     @NotBlank(message = "Password confirmation must be blank")

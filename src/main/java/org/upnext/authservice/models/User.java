@@ -31,7 +31,7 @@ public class User {
 
     private String address;
 
-    private Boolean isConfirmed;
+    private Boolean isConfirmed = false;
 
 
 }
