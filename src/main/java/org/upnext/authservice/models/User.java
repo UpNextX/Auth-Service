@@ -1,20 +1,25 @@
 package org.upnext.authservice.models;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.upnext.authservice.validation.PasswordValidator;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.upnext.authservice.enums.Roles;
+
+import javax.management.relation.Role;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Entity
-public class User {
+@Table(name = "users")
+public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -27,11 +32,25 @@ public class User {
 
     private String password;
 
-    private String role = "USER";
+    @Column(name = "role")
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private List<Roles> roles = new ArrayList<>(List.of(Roles.USER));
 
     private String address;
 
     private Boolean isConfirmed = false;
 
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.name()))
+                .toList();
+    }
+    @Override
+    public String getUsername() {
+        return email;
+    }
 }

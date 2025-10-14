@@ -1,5 +1,7 @@
 package org.upnext.authservice.services;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.upnext.authservice.dtos.request.EmailRequest;
@@ -7,18 +9,22 @@ import org.upnext.authservice.dtos.request.LoginRequest;
 import org.upnext.authservice.dtos.request.PasswordResetRequest;
 import org.upnext.authservice.dtos.request.RegisterRequest;
 import org.upnext.authservice.dtos.response.LoginResponse;
+import org.upnext.authservice.models.User;
+import org.upnext.sharedlibrary.Dtos.UserDto;
+import org.upnext.sharedlibrary.Errors.Result;
 
 public interface AuthService {
-    LoginResponse login(@Valid @RequestBody LoginRequest loginRequest);
+    Result<UserDto> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response);
 
     void register(@Valid @RequestBody RegisterRequest registerRequest);
 
     void confirmAccount(String token);
 
-    void requireConfirmation(EmailRequest emailRequest);
+    Result<String> requireConfirmation(EmailRequest emailRequest);
 
     void sendPasswordResetMail(EmailRequest emailRequest);
 
     void passwordReset(@Valid @RequestBody PasswordResetRequest passwordResetRequest);
 
+    void logout(HttpServletResponse response);
 }

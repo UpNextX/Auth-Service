@@ -31,7 +31,6 @@ public class RegisterRequest {
 
     @NotBlank(message = "Email confirmation must not be blank")
     @Email(message = "Please provide a valid email confirmation")
-    @Transient
     private String emailConfirm;
 
     @NotBlank(message = "Password must be blank")
