@@ -78,14 +78,7 @@ public class JwtUtils {
     }
 
     public String getJwtFromHeader(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if(cookies != null) {
-            return Arrays.stream(cookies)
-                    .filter(cookie -> cookie.getName().equals("jwt"))
-                    .map(Cookie::getValue)
-                    .findFirst().orElse(null);
-        }
-        return null;
+        return request.getHeader("X-User");
     }
     public boolean isValidToken(String token) {
         extractAllClaims(token);

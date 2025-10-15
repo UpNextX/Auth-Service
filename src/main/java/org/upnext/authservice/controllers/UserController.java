@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.upnext.authservice.dtos.request.PasswordChangeRequest;
 import org.upnext.authservice.models.User;
 import org.upnext.authservice.services.UserService;
+import org.upnext.sharedlibrary.Dtos.UserDto;
 import org.upnext.sharedlibrary.Errors.Result;
 
 @RestController
@@ -19,7 +20,7 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal User user) {
+    public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDto user) {
         return ResponseEntity.ok(userService.loadUserDtoById(user.getId()));
     }
 
@@ -31,8 +32,8 @@ public class UserController {
 
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @PutMapping("/me/password")
-    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal User user, @RequestBody PasswordChangeRequest passwordChangeRequest) {
-        Result<Void> result = userService.updatePassword(user, passwordChangeRequest.getOldPassword(), passwordChangeRequest.getNewPassword());
+    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal UserDto user, @RequestBody PasswordChangeRequest passwordChangeRequest) {
+        Result<Void> result = userService.updatePassword(user.getId(), passwordChangeRequest.getOldPassword(), passwordChangeRequest.getNewPassword());
         if(result.isSuccess()) {
             return ResponseEntity.noContent().build();
 

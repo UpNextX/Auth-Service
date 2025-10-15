@@ -17,7 +17,7 @@ public interface UserService {
 
     void updatePassword(User user, String password);
 
-    Result<Void> updatePassword(User user, String oldPassword, String newPassword);
+    Result<Void> updatePassword(Long id, String oldPassword, String newPassword);
 
     User loadUserObjectById(Long id);
 

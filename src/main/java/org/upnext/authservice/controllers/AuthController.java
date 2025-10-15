@@ -46,7 +46,7 @@ public class AuthController {
         if(authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
+        authService.logout(response);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 

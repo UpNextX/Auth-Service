@@ -164,6 +164,7 @@ public class AuthServiceImpl implements AuthService {
         jwtCookie.setMaxAge(0);
         jwtCookie.setSecure(false);
         jwtCookie.setHttpOnly(true);
+        jwtCookie.setPath("/");
         response.addCookie(jwtCookie);
     }
 

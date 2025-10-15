@@ -48,7 +48,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<Void> updatePassword(User user, String oldPassword, String newPassword) {
+    @Transactional
+    public Result<Void> updatePassword(Long id, String oldPassword, String newPassword) {
+        User user = loadUserObjectById(id);
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             return Result.failure(new Error("Password.Incorrect", "Old password is incorrect", 400));
         }
