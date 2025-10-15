@@ -70,9 +70,7 @@ public class AuthController {
 
     @PostMapping("/require-confirm")
     public ResponseEntity<?> requireConfirm(@RequestBody EmailRequest emailRequest, Authentication authentication) {
-        if(authentication != null && authentication.isAuthenticated()){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Signed in!");
-        }
+
         Result<String> result = authService.requireConfirmation(emailRequest);
         if (result.getIsFailure()) {
             return ResponseEntity.status(result.getError()
@@ -89,7 +87,7 @@ public class AuthController {
     }
 
 
-    @PostMapping("/forget-password")
+    @PostMapping("/forgot-password")
     public ResponseEntity<?> forgetPassword(@RequestBody @Valid EmailRequest passwordResetWithMail, Authentication authentication) {
         if(authentication != null && authentication.isAuthenticated()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Signed in!");
@@ -100,12 +98,13 @@ public class AuthController {
     }
 
     @PutMapping("/reset-password")
-    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest, Authentication authentication) {
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest, @RequestParam("token") String token, Authentication authentication) {
+        System.out.println("RESET-PASSWORD");
         if(authentication != null && authentication.isAuthenticated()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Signed in!");
         }
 
-        authService.passwordReset(passwordResetRequest);
+        authService.passwordReset(token, passwordResetRequest.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 }

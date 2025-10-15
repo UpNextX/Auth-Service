@@ -24,7 +24,7 @@ public interface AuthService {
 
     void sendPasswordResetMail(EmailRequest emailRequest);
 
-    void passwordReset(@Valid @RequestBody PasswordResetRequest passwordResetRequest);
+    void passwordReset(String token, String password);
 
     void logout(HttpServletResponse response);
 }

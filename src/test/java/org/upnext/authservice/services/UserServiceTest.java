@@ -33,20 +33,25 @@ public class UserServiceTest {
     @Test
     public void givenNonExistsEmail_whenFindByEmail_thenThrowUserNotFoundException(){
         String email = "email";
+        when(userRepository.existsByEmail(email)).thenReturn(false);
         assertThrows(UserNotFound.class, () -> userService.loadUserByEmail(email));
-
     }
 
     @Test
-    public void givenValidUser_whenSave_thenTrue(){
+    void givenValidUser_whenSave_thenReturnSavedUser() {
         User user = new User();
         user.setEmail("eslam@gmail.com");
         user.setPassword("password");
         user.setIsConfirmed(false);
         user.setName("name");
         user.setPhoneNumber("01029842716");
-        user.setAddress("Cario");
+        user.setAddress("Cairo");
+
         when(userRepository.save(any(User.class))).thenReturn(user);
-        assertThat(userService.save(user)).isNotNull();
+
+        User saved = userService.save(user);
+
+        assertThat(saved).isNotNull();
+        assertThat(saved.getEmail()).isEqualTo("eslam@gmail.com");
     }
 }

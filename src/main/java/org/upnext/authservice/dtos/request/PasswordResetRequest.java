@@ -8,8 +8,6 @@ import org.upnext.authservice.validation.PasswordValidator;
 @Data
 public class PasswordResetRequest {
     @NotBlank
-    private String token;
-    @NotBlank
     @PasswordValidator
     private String newPassword;
 }

@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,8 +29,14 @@ import org.upnext.authservice.services.UserService;
 import org.upnext.sharedlibrary.Dtos.UserDto;
 import org.upnext.sharedlibrary.Errors.Error;
 import org.upnext.sharedlibrary.Errors.Result;
+import org.upnext.sharedlibrary.Events.MailEvent;
 
 import java.time.LocalDateTime;
+
+import static org.upnext.authservice.configurations.RabbitMqAccountConfirmConfig.EMAIL_CONFIRM_EXCHANGE;
+import static org.upnext.authservice.configurations.RabbitMqAccountConfirmConfig.EMAIL_CONFIRM_ROUTING_KEY;
+import static org.upnext.authservice.configurations.RabbitMqPasswordResetConfig.FORGET_PASS_EXCHANGE;
+import static org.upnext.authservice.configurations.RabbitMqPasswordResetConfig.FORGET_PASS_ROUTING_KEY;
 
 @Slf4j
 @Service
@@ -40,6 +47,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final TokensRepository tokensRepository;
     private final JwtUtils jwtUtils;
+    private final RabbitTemplate rabbitTemplate;
 
     @Value("${frontend.url}")
     String frontUrl;
@@ -63,9 +71,6 @@ public class AuthServiceImpl implements AuthService {
         response.addCookie(jwtCookie);
 
         return Result.success(userMapper.toUserDto(user)) ;
-
-
-
     }
 
     @Override
@@ -128,29 +133,20 @@ public class AuthServiceImpl implements AuthService {
         User user = userService.loadUserByEmail(email);
 
 
-        Token token = Token.builder()
-                .isUsed(false)
-                .user(user)
-                .expiryDate(LocalDateTime.now())
-                .type(TokenType.PASSWORD_RESET)
-                .build();
-
-        token = tokensRepository.save(token);
-
-        String resetUrl = frontUrl + "/reset-password?token=" + token.getToken();
-        // TODO publish event to send email
+        sendResetPasswordMail(user);
     }
 
     @Override
-    public void passwordReset(PasswordResetRequest passwordResetRequest) {
-
-        Token token = tokensRepository.findByTokenAndType(passwordResetRequest.getToken(), TokenType.PASSWORD_RESET)
+    public void passwordReset(String tokenStr, String password) {
+        if(tokenStr == null) {
+            throw new TokenNotFound("Invalid or unknown token!");
+        }
+        Token token = tokensRepository.findByTokenAndType(tokenStr, TokenType.PASSWORD_RESET)
                 .orElseThrow(() -> new TokenNotFound("Invalid or unknown token!"));
 
         verifyToken(token);
         token.setIsUsed(true);
 
-        String password = passwordResetRequest.getNewPassword();
         String hashedPassword = passwordEncoder.encode(password);
 
         userService.updatePassword(token.getUser(), hashedPassword);
@@ -197,9 +193,33 @@ public class AuthServiceImpl implements AuthService {
 
         token = tokensRepository.save(token);
 
-        String confirmationLink = frontUrl + "/auth/confirm?token=" + token.getToken();
+        String confirmationLink = frontUrl + "/auth/confirm.html?token=" + token.getToken();
 
-        // TODO publish event to send email
+        MailEvent mailEvent = new MailEvent();
+        mailEvent.setEmail(user.getEmail());
+        mailEvent.setName(user.getName());
+        mailEvent.setConfirmation_url(confirmationLink);
+        System.out.println("Email Confirmation Link Will Be Sent");
+        rabbitTemplate.convertAndSend(EMAIL_CONFIRM_EXCHANGE, EMAIL_CONFIRM_ROUTING_KEY, mailEvent);
+    }
+
+    private void sendResetPasswordMail(User user){
+        Token token = Token.builder()
+                .isUsed(false)
+                .user(user)
+                .expiryDate(LocalDateTime.now().plusHours(4))
+                .type(TokenType.PASSWORD_RESET)
+                .build();
+
+        token = tokensRepository.save(token);
+
+        String resetUrl = frontUrl + "/auth/reset-password.html?token=" + token.getToken();
+        MailEvent mailEvent = new MailEvent();
+        mailEvent.setEmail(user.getEmail());
+        mailEvent.setName(user.getName());
+        mailEvent.setConfirmation_url(resetUrl);
+        System.out.println("Email Reset Link Will Be Sent");
+        rabbitTemplate.convertAndSend(FORGET_PASS_EXCHANGE, FORGET_PASS_ROUTING_KEY, mailEvent);
     }
 
 
