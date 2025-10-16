@@ -22,27 +22,5 @@ public class RabbitMqAccountConfirmConfig {
         return new TopicExchange(EMAIL_CONFIRM_EXCHANGE);
     }
 
-    public Queue mailConfirmQueue() {
-        return new Queue(EMAIL_CONFIRM_QUEUE);
-    }
-
-    public Binding mailConfirmBinding(Queue mailConfirmQueue, TopicExchange mailConfirmExchange) {
-        return BindingBuilder.bind(mailConfirmQueue).to(mailConfirmExchange).with(EMAIL_CONFIRM_ROUTING_KEY);
-    }
-
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
-
-    @Bean
-    public RabbitListenerContainerFactory<?> rabbitListenerContainerFactory(
-            ConnectionFactory connectionFactory, MessageConverter messageConverter) {
-
-        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(messageConverter);
-        return factory;
-    }
 
 }
