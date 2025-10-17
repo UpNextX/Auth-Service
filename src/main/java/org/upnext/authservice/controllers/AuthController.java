@@ -51,12 +51,14 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest, Authentication authentication) {
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest, Authentication authentication, HttpServletResponse response) {
         if(authentication != null && authentication.isAuthenticated()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Signed in!");
         }
-        authService.register(registerRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        Result<UserDto>result = authService.register(registerRequest, response);
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(result.getValue());
     }
 
     @GetMapping("/confirm")

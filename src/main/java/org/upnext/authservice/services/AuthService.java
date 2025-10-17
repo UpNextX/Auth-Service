@@ -16,7 +16,7 @@ import org.upnext.sharedlibrary.Errors.Result;
 public interface AuthService {
     Result<UserDto> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response);
 
-    void register(@Valid @RequestBody RegisterRequest registerRequest);
+    Result<UserDto> register(@Valid @RequestBody RegisterRequest registerRequest, HttpServletResponse response);
 
     void confirmAccount(String token);
 

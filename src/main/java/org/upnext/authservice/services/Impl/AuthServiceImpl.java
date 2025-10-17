@@ -75,17 +75,24 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void register(RegisterRequest registerRequest) {
+    public Result<UserDto> register(RegisterRequest registerRequest, HttpServletResponse response) {
         // if email exists throws an exception
-        checkExistingAccount(registerRequest.getEmail());
+        if(checkExistingAccount(registerRequest.getEmail())){
+            throw new EmailAlreadyUsed("Email already used!");
+        }
 
-        User user = extractUserFromRegister(registerRequest);
+        User user = userMapper.toUserFromRegisterRequest(registerRequest);
+        user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
 
         user = userService.save(user);
 
         // publish event for the mail service to send confirmation
         sendConfirmationMail(user);
+
+        return login(new LoginRequest(registerRequest.getEmail(), registerRequest.getPassword()), response);
     }
+
+
 
     @Override
     public void confirmAccount(String token) {
@@ -164,23 +171,10 @@ public class AuthServiceImpl implements AuthService {
         response.addCookie(jwtCookie);
     }
 
-    private void checkExistingAccount(String email) {
-        if (userService.existsByEmail(email)) {
-            throw new EmailAlreadyUsed("Email already used!");
-        }
+    private Boolean checkExistingAccount(String email) {
+        return userService.existsByEmail(email);
     }
 
-    private User extractUserFromRegister(RegisterRequest registerRequest) {
-        User user = new User();
-        user.setName(registerRequest.getName());
-        user.setAddress(registerRequest.getAddress());
-        user.setPhoneNumber(registerRequest.getPhoneNumber());
-        user.setEmail(registerRequest.getEmail());
-        user.setPassword(registerRequest.getPassword());
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return user;
-
-    }
 
     private void sendConfirmationMail(User user) {
 
