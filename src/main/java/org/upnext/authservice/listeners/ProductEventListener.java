@@ -36,6 +36,7 @@ public class ProductEventListener {
         List<UserDto> userList = userService.loadAllUsers();
         NotificationEvent event = new NotificationEvent();
         event.setId(productEvent.getId());
+        event.setName(productEvent.getName());
         event.setBrand(productEvent.getBrand());
         event.setDescription(productEvent.getDescription());
         event.setPrice(productEvent.getPrice());
