@@ -83,8 +83,8 @@ public class AuthServiceImpl implements AuthService {
 
         User user = userMapper.toUserFromRegisterRequest(registerRequest);
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
-
         user = userService.save(user);
+       // System.out.println(user);
 
         // publish event for the mail service to send confirmation
         sendConfirmationMail(user);

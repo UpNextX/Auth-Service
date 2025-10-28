@@ -50,7 +50,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             Collection<? extends GrantedAuthority> authorities = user.getRole().stream()
                     .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
                     .toList();
-            System.out.println(user);
+            //System.out.println(user);
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(user, null, authorities);
             //user.getAuthorities().stream().forEach(item -> System.out.println(item.getAuthority()));

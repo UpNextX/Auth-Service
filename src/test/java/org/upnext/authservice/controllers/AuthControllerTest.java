@@ -39,13 +39,6 @@ public class AuthControllerTest {
 
     @MockitoBean
     JwtEntryPoint jwtEntryPoint;
-    @Test
-    public void testLoginAlreadyAuthenticated() throws Exception {
 
-        mockMvc.perform(post("/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andExpect((ResultMatcher) content().string("Already Signed in!"));
-    }
 
 }

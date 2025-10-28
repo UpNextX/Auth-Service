@@ -101,7 +101,6 @@ public class AuthController {
 
     @PutMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@Valid @RequestBody PasswordResetRequest passwordResetRequest, @RequestParam("token") String token, Authentication authentication) {
-        System.out.println("RESET-PASSWORD");
         if(authentication != null && authentication.isAuthenticated()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Signed in!");
         }
