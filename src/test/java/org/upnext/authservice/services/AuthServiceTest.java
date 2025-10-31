@@ -116,9 +116,8 @@ public class AuthServiceTest {
         when(userMapper.toUserDto(user)).thenReturn(userDto);
         HttpServletResponse response = mock(HttpServletResponse.class);
 
-        Result<UserDto> result = authService.register(registerRequest, response);
+        Result<Void> result = authService.register(registerRequest, response);
         assertThat(result.isSuccess()).isTrue();
-        assertThat(result.getValue().getEmail()).isEqualTo(registerRequest.getEmail());
         ArgumentCaptor<MailEvent> mailEventCaptor = ArgumentCaptor.forClass(MailEvent.class);
 
         verify(userService).save(any(User.class));

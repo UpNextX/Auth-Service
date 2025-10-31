@@ -55,7 +55,7 @@ public class AuthController {
         if(authentication != null && authentication.isAuthenticated()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Signed in!");
         }
-        Result<UserDto>result = authService.register(registerRequest, response);
+        Result<Void>result = authService.register(registerRequest, response);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(result.getValue());

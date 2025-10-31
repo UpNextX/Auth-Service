@@ -60,7 +60,9 @@ public class AuthServiceImpl implements AuthService {
         if(!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             return Result.failure(new Error("User.Invalid", "No user with this credentials!", 401));
         }
-
+        if(!user.getIsConfirmed()){
+            return Result.failure(new Error("User.Invalid", "User is not confirmed!", 401));
+        }
         String token = jwtUtils.generateToken(user);
 
         Cookie jwtCookie = new Cookie("jwt", token);
@@ -75,7 +77,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public Result<UserDto> register(RegisterRequest registerRequest, HttpServletResponse response) {
+    public Result<Void> register(RegisterRequest registerRequest, HttpServletResponse response) {
         // if email exists throws an exception
         if(checkExistingAccount(registerRequest.getEmail())){
             throw new EmailAlreadyUsed("Email already used!");
@@ -89,7 +91,7 @@ public class AuthServiceImpl implements AuthService {
         // publish event for the mail service to send confirmation
         sendConfirmationMail(user);
 
-        return login(new LoginRequest(registerRequest.getEmail(), registerRequest.getPassword()), response);
+        return Result.success();
     }
 
 

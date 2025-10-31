@@ -33,7 +33,7 @@ public class ProductEventListener {
     @RabbitListener(queues = PRODUCT_QUEUE)
     public void handleNewProductAdded(ProductEvent productEvent) {
         logger.info("Product event received : {}", productEvent);
-        List<UserDto> userList = userService.loadAllUsers();
+        List<UserDto> userList = userService.loadAllConfirmedUsers();
         NotificationEvent event = new NotificationEvent();
         event.setId(productEvent.getId());
         event.setName(productEvent.getName());

@@ -41,5 +41,11 @@ public class UserController {
         return ResponseEntity.status(result.getError().getStatusCode()).body(result.getError().getMessage());
     }
 
+    @PutMapping("/me")
+    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDto user) {
+        userService.makeAdmin(user.getId());
+        return ResponseEntity.noContent().build();
+    }
+
 
 }

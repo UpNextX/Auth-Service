@@ -22,6 +22,8 @@ public interface UserService {
     User loadUserObjectById(Long id);
 
     UserDto loadUserDtoById(Long id);
-
+    List<UserDto> loadAllConfirmedUsers();
     List<UserDto> loadAllUsers();
+
+    Void makeAdmin(Long id);
 }

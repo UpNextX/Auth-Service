@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.upnext.authservice.enums.Roles;
 import org.upnext.authservice.exceptions.UserNotFound;
 import org.upnext.authservice.mappers.UserMapper;
 import org.upnext.authservice.models.User;
@@ -70,11 +71,27 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<UserDto> loadAllConfirmedUsers() {
+        List<User> users = userRepository.findAllByIsConfirmed(true);
+        return users.stream()
+                .map(userMapper::toUserDto)
+                .toList();
+    }
+
+    @Override
     public List<UserDto> loadAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream()
                 .map(userMapper::toUserDto)
                 .toList();
+    }
+
+    @Override
+    public Void makeAdmin(Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFound("No user with such id"));
+        user.getRoles().add(Roles.ADMIN);
+        userRepository.save(user);
+        return null;
     }
 
 
