@@ -28,6 +28,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest, HttpServletResponse response, Authentication authentication) {
+        System.out.println("Logging in controller");
         if(authentication != null && authentication.isAuthenticated()){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Already Signed in!");
         }

@@ -22,9 +22,10 @@ public class JwtEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        logger.error("Unauthorized access");
+        logger.error("Unauthorized access 1");
         response.setContentType(MediaType.APPLICATION_JSON);
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        System.out.println("Message: " + authException.getMessage());
         final Map<String, Object> map = new HashMap<>();
         map.put("message", "Unauthorized access");
         map.put("status", HttpServletResponse.SC_UNAUTHORIZED);
