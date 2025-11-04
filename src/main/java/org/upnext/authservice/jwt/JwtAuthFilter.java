@@ -35,6 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final ObjectMapper objectMapper;
+    private final UserService userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -43,9 +44,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String token = jwtUtils.getJwtFromHeader(request);
 
         if (token != null) {
-            System.out.println("Token: " + token);
             String decoded = new String(Base64.getDecoder().decode(token), StandardCharsets.UTF_8);
+
             UserDto user =  objectMapper.readValue(decoded, UserDto.class);
+            userService.loadUserByEmail(user.getEmail());
 
             Collection<? extends GrantedAuthority> authorities = user.getRole().stream()
                     .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
