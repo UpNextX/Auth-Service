@@ -191,7 +191,7 @@ public class AuthServiceImpl implements AuthService {
 
         token = tokensRepository.save(token);
 
-        String confirmationLink = frontUrl + "/auth/confirm.html?token=" + token.getToken();
+        String confirmationLink = frontUrl + "/verify-email?token=" + token.getToken();
 
         MailEvent mailEvent = new MailEvent();
         mailEvent.setEmail(user.getEmail());
@@ -211,7 +211,7 @@ public class AuthServiceImpl implements AuthService {
 
         token = tokensRepository.save(token);
 
-        String resetUrl = frontUrl + "/auth/reset-password.html?token=" + token.getToken();
+        String resetUrl = frontUrl + "/reset-password?token=" + token.getToken();
         MailEvent mailEvent = new MailEvent();
         mailEvent.setEmail(user.getEmail());
         mailEvent.setName(user.getName());
