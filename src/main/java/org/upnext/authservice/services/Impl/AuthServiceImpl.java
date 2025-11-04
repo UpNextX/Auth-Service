@@ -75,6 +75,8 @@ public class AuthServiceImpl implements AuthService {
         return Result.success(userMapper.toUserDto(user)) ;
     }
 
+
+
     @Override
     @Transactional
     public Result<Void> register(RegisterRequest registerRequest, HttpServletResponse response) {

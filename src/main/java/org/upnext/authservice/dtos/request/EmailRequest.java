@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-// when user enters his male and forget password
+// when user enters his mail and forget password
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

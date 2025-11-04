@@ -1,5 +1,7 @@
 package org.upnext.authservice.services;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.upnext.authservice.dtos.request.UpdateUserRequest;
 import org.upnext.authservice.models.User;
 import org.upnext.sharedlibrary.Dtos.UserDto;
 import org.upnext.sharedlibrary.Errors.*;
@@ -23,7 +25,10 @@ public interface UserService {
 
     UserDto loadUserDtoById(Long id);
     List<UserDto> loadAllConfirmedUsers();
+
     List<UserDto> loadAllUsers();
 
-    Void makeAdmin(Long id);
+    Result<Void> makeAdmin(Long id, HttpServletResponse response);
+
+    Result<Void> updateUser(Long userId, UpdateUserRequest updateUserRequest, HttpServletResponse response, Boolean isAdmin);
 }

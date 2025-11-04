@@ -1,11 +1,15 @@
 package org.upnext.authservice.services.Impl;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.upnext.authservice.dtos.request.UpdateUserRequest;
 import org.upnext.authservice.enums.Roles;
 import org.upnext.authservice.exceptions.UserNotFound;
+import org.upnext.authservice.jwt.JwtUtils;
 import org.upnext.authservice.mappers.UserMapper;
 import org.upnext.authservice.models.User;
 import org.upnext.authservice.repositories.UserRepository;
@@ -17,12 +21,15 @@ import org.upnext.sharedlibrary.Errors.Error;
 
 import java.util.List;
 
+import static org.upnext.authservice.utils.CopyFieldsToClass.copyNonNullAndNonBlankFields;
+
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
 
     @Override
     @Transactional
@@ -85,13 +92,37 @@ public class UserServiceImpl implements UserService {
                 .map(userMapper::toUserDto)
                 .toList();
     }
+    void updateResponseJwts(HttpServletResponse response, String token){
+        Cookie jwtCookie = new Cookie("jwt", token);
+        jwtCookie.setPath("/");
+        jwtCookie.setHttpOnly(true);
+        jwtCookie.setSecure(true);
+        jwtCookie.setMaxAge(24 * 60 * 60);
+        response.addCookie(jwtCookie);
 
+    }
     @Override
-    public Void makeAdmin(Long id) {
+    public Result<Void> makeAdmin(Long id, HttpServletResponse response) {
         User user = userRepository.findById(id).orElseThrow(() -> new UserNotFound("No user with such id"));
         user.getRoles().add(Roles.ADMIN);
         userRepository.save(user);
-        return null;
+
+        String token = jwtUtils.generateToken(user);
+        updateResponseJwts(response, token);
+        return Result.success();
+    }
+
+    @Override
+    public Result<Void> updateUser(Long userId, UpdateUserRequest updateUserRequest, HttpServletResponse response, Boolean isAdmin) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFound("No user with such id"));
+        copyNonNullAndNonBlankFields(updateUserRequest, user);
+        userRepository.save(user);
+        // if this user is admin so we do not want to update the token
+        if(!isAdmin) {
+            String token = jwtUtils.generateToken(user);
+            updateResponseJwts(response, token);
+        }
+        return Result.success();
     }
 
 

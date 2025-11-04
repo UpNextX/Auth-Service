@@ -37,7 +37,7 @@ public class User implements UserDetails {
     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private List<Roles> roles = new ArrayList<>(List.of(Roles.USER));
+    private Set<Roles> roles = new HashSet<>(Set.of(Roles.USER));
 
     private String address;
 

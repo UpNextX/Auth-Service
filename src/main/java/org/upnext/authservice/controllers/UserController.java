@@ -2,13 +2,16 @@ package org.upnext.authservice.controllers;
 
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.upnext.authservice.dtos.request.PasswordChangeRequest;
+import org.upnext.authservice.dtos.request.UpdateUserRequest;
 import org.upnext.authservice.models.User;
 import org.upnext.authservice.services.UserService;
 import org.upnext.sharedlibrary.Dtos.UserDto;
@@ -64,9 +67,31 @@ public class UserController {
             summary = "Make current user an admin (testing/demo endpoint)",
             description = "Temporarily grants admin privileges to the current user."
     )
+
+    @PutMapping("/me/admin")
+    public ResponseEntity<?> updateUserRole(@AuthenticationPrincipal UserDto user, HttpServletResponse response) {
+        userService.makeAdmin(user.getId(), response);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("isAuthenticated()")
     @PutMapping("/me")
-    public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDto user) {
-        userService.makeAdmin(user.getId());
+    public ResponseEntity<?> updateUserData(@AuthenticationPrincipal UserDto user,@RequestBody UpdateUserRequest updateUserRequest, HttpServletResponse response) {
+        userService.updateUser(user.getId(), updateUserRequest, response, false);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(
+            summary = "Update user data with user id for admins only",
+            responses = {
+                    @ApiResponse(responseCode = "204",description = "Updated user data successfully"),
+                    @ApiResponse(responseCode = "401", description = "UnAuthorized")
+            }
+    )
+    @PreAuthorize("hasRole('ADMIN')")
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateUserDataAdmin(@PathVariable Long id,@RequestBody UpdateUserRequest updateUserRequest, HttpServletResponse response) {
+        userService.updateUser(id, updateUserRequest, response, true);
         return ResponseEntity.noContent().build();
     }
 
