@@ -92,7 +92,7 @@ public class AuthServiceImpl implements AuthService {
 
         // publish event for the mail service to send confirmation
         sendConfirmationMail(user);
-
+        newUserEvent(user);
         return Result.success();
     }
 
@@ -200,6 +200,8 @@ public class AuthServiceImpl implements AuthService {
         System.out.println("Email Confirmation Link Will Be Sent");
         rabbitTemplate.convertAndSend(EMAIL_CONFIRM_EXCHANGE, EMAIL_CONFIRM_ROUTING_KEY, mailEvent);
     }
+
+    private void newUserEvent(User user){}
 
     private void sendResetPasswordMail(User user){
         Token token = Token.builder()

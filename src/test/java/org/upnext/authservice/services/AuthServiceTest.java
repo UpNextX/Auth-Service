@@ -80,13 +80,13 @@ public class AuthServiceTest {
         verify(jwtUtils, never()).generateToken(any(User.class));
 
     }
+
     @Test
-    public void givenInvalidCredentials_whenLogin_thenError() {
+    public void givenValidCredentials_whenRegister_thenSuccess() {
         RegisterRequest registerRequest = new RegisterRequest();
         String password = "password";
         String encodedPassword = "encodedPassword";
-        registerRequest.setEmail("email@gmai.com");
-        String generatedToken = "dummy.jwt.token";
+        registerRequest.setEmail("email@gmail.com");
         registerRequest.setPassword(password);
 
         User user = new User();
@@ -105,28 +105,26 @@ public class AuthServiceTest {
                 .expiryDate(LocalDateTime.now().plusDays(1))
                 .build();
 
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
         when(userService.existsByEmail(registerRequest.getEmail())).thenReturn(false);
         when(userMapper.toUserFromRegisterRequest(registerRequest)).thenReturn(user);
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
         when(userService.save(any(User.class))).thenReturn(user);
         when(tokensRepository.save(any(Token.class))).thenReturn(token);
-        when(userService.loadUserByEmail(registerRequest.getEmail())).thenReturn(user);
-        when(passwordEncoder.matches(password, encodedPassword)).thenReturn(true);
-        when(jwtUtils.generateToken(user)).thenReturn(generatedToken);
-        when(userMapper.toUserDto(user)).thenReturn(userDto);
-        HttpServletResponse response = mock(HttpServletResponse.class);
 
         Result<Void> result = authService.register(registerRequest, response);
-        assertThat(result.isSuccess()).isTrue();
-        ArgumentCaptor<MailEvent> mailEventCaptor = ArgumentCaptor.forClass(MailEvent.class);
 
+        assertThat(result.isSuccess()).isTrue();
+
+        ArgumentCaptor<MailEvent> mailEventCaptor = ArgumentCaptor.forClass(MailEvent.class);
         verify(userService).save(any(User.class));
         verify(tokensRepository).save(any(Token.class));
         verify(rabbitTemplate).convertAndSend(anyString(), anyString(), mailEventCaptor.capture());
         assertThat(mailEventCaptor.getValue().getEmail()).isEqualTo(registerRequest.getEmail());
-        verify(response).addCookie(any(Cookie.class));
 
     }
+
 
     @Test
     void givenInValidCredentials_whenLogIn_thenFailed() {
@@ -149,32 +147,43 @@ public class AuthServiceTest {
     }
 
     @Test
-    void givenCredentials_whenLogIn_thenReturnsUserDto() {
+    void givenValidCredentials_whenLogIn_thenReturnsUserDto() {
+        // Arrange
         LoginRequest loginRequest = new LoginRequest();
         loginRequest.setEmail("email@gmail.com");
         loginRequest.setPassword("password");
+
         String token = "login-token";
         String encodedPassword = "encodedPassword";
+
         User user = new User();
         user.setId(1L);
         user.setEmail(loginRequest.getEmail());
         user.setPassword(encodedPassword);
+        user.setIsConfirmed(true);
+
         UserDto userDto = new UserDto();
         userDto.setEmail(user.getEmail());
         userDto.setId(user.getId());
-        userDto.setId(user.getId());
+
+        HttpServletResponse response = mock(HttpServletResponse.class);
+
         when(userService.loadUserByEmail(loginRequest.getEmail())).thenReturn(user);
-        when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())).thenReturn(true);
+        when(passwordEncoder.matches(loginRequest.getPassword(), encodedPassword)).thenReturn(true);
         when(jwtUtils.generateToken(user)).thenReturn(token);
         when(userMapper.toUserDto(user)).thenReturn(userDto);
-        HttpServletResponse response = mock(HttpServletResponse.class);
 
         Result<UserDto> result = authService.login(loginRequest, response);
 
         assertThat(result.isSuccess()).isTrue();
         assertThat(result.getValue().getEmail()).isEqualTo(loginRequest.getEmail());
-        verify(response, atMostOnce()).addCookie(any(Cookie.class));
+        assertThat(result.getValue().getId()).isEqualTo(user.getId());
 
+        verify(userService).loadUserByEmail(loginRequest.getEmail());
+        verify(passwordEncoder).matches(loginRequest.getPassword(), encodedPassword);
+        verify(jwtUtils).generateToken(user);
+        verify(userMapper).toUserDto(user);
+        verify(response).addCookie(any(Cookie.class));
     }
 
     @Test

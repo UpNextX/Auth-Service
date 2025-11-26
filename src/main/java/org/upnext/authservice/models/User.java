@@ -28,13 +28,18 @@ public class User implements UserDetails {
 
     private String phoneNumber;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String password;
 
     @Column(name = "role")
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(
+            name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "role"})
+    )
     @Enumerated(EnumType.STRING)
     @Builder.Default
     private Set<Roles> roles = new HashSet<>(Set.of(Roles.USER));
